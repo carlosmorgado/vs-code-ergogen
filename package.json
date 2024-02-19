@@ -1,0 +1,144 @@
+{
+    "name": "ergogen",
+    "publisher": "carlosmorgado",
+    "displayName": "Ergogen",
+    "description": "",
+    "icon": "./src/assets/ergogen.png",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.69.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "customEditors": [
+            {
+                "viewType": "ergogen.editor",
+                "displayName": "Ergogen",
+                "selector": [
+                    {
+                        "filenamePattern": "*.ergogen"
+                    }
+                ]
+            }
+        ],
+        "languages": [
+            {
+                "id": "ergogen",
+                "extensions": [
+                    ".ergogen"
+                ],
+                "icon": {
+                    "dark": "src/assets/icons/ergogen.svg",
+                    "light": "src/assets/icons/ergogen.svg"
+                }
+            }
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "ergogen-explorer",
+                    "title": "Ergogen Explorer",
+                    "icon": "src/assets/icons/ergogen.svg"
+                }
+            ]
+        },
+        "views": {
+            "ergogen-explorer": [
+                {
+                    "id": "ergogen.views.project",
+                    "name": "Ergogen Project"
+                }
+            ]
+        },
+        "menus": {
+            "view/title": [
+                {
+                    "command": "ergogen.configureProject",
+                    "when": "view == ergogen.views.project",
+                    "group": "navigation"
+                },
+                {
+                    "command": "ergogen.startProject",
+                    "when": "view == ergogen.views.project && ergogen.startProjectVisible",
+                    "group": "navigation"
+                }
+            ],
+            "editor/title": [
+                {
+                    "command": "ergogen.textEditor.open",
+                    "when": "activeCustomEditorId == 'ergogen.editor'",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "ergogen.editor.open",
+                    "when": "(resourceExtname == '.ergogen') && activeEditor == 'workbench.editors.files.textFileEditor'",
+                    "group": "navigation@1"
+                }
+            ]
+        },
+        "commands": [
+            {
+                "command": "ergogen.configureProject",
+                "title": "Configure Ergogen Project",
+                "category": "Ergogen Editor",
+                "icon": {
+                    "light": "src/assets/icons/light/gear.svg",
+                    "dark": "src/assets/icons/dark/gear.svg"
+                }
+            },
+            {
+                "command": "ergogen.startProject",
+                "title": "Start Ergogen Project",
+                "icon": {
+                    "light": "src/assets/icons/light/add.svg",
+                    "dark": "src/assets/icons/dark/add.svg"
+                }
+            },
+            {
+                "command": "ergogen.textEditor.open",
+                "title": "Open in Text Editor",
+                "category": "Ergogen Editor",
+                "icon": "$(notebook-open-as-text)"
+            },
+            {
+                "command": "ergogen.editor.open",
+                "title": "Open in Ergogen Editor",
+                "category": "Ergogen Editor",
+                "icon": "$(notebook-render-output)"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "rimraf ./out && npm run package",
+        "compile": "rimraf ./out && node ./esbuild.js",
+        "package": "cross-env NODE_ENV=production node ./esbuild.js",
+        "watch": "node ./esbuild.js --watch",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/glob": "^8.1.0",
+        "@types/mocha": "^10.0.6",
+        "@types/node": "^20.11.19",
+        "@types/vscode": "^1.86.0",
+        "@typescript-eslint/eslint-plugin": "^7.0.1",
+        "@typescript-eslint/parser": "^7.0.1",
+        "@vscode/codicons": "^0.0.35",
+        "@vscode/test-electron": "^2.3.9",
+        "cross-env": "^7.0.3",
+        "esbuild": "^0.20.1",
+        "esbuild-plugin-copy": "^2.1.1",
+        "eslint": "^8.56.0",
+        "glob": "^10.3.10",
+        "mocha": "^10.3.0",
+        "rxjs": "^7.8.1",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "@vscode/webview-ui-toolkit": "^1.4.0"
+    }
+}
