@@ -1,7 +1,8 @@
-import { CancellationToken, CustomTextEditorProvider, Disposable, ExtensionContext, Range, TextDocument, Uri, ViewColumn, Webview, WebviewPanel, WorkspaceEdit, commands, window, workspace } from "vscode";
+import { CancellationToken, CustomTextEditorProvider, Disposable, ExtensionContext, Range, TextDocument, TextDocumentShowOptions, TextEditor, Uri, ViewColumn, Webview, WebviewPanel, WorkspaceEdit, commands, window, workspace } from "vscode";
 import { ViewTypes } from "../constants/view.types";
 import { getNonce } from "../utils/getNonce";
 import { Commands } from "../constants/comands";
+import { Events } from "../constants/events";
 
 // Based on https://github.com/timheuer/resx-editor/tree/main
 
@@ -53,7 +54,7 @@ export class ErgogenProvider implements CustomTextEditorProvider {
     }
 
     private eventListner(event: any, document: TextDocument): void {
-        if (event.type === 'ergogen-editor-save') {
+        if (event.type === Events.editorSave) {
             this.saveTextDocumentAsync(document, event.json);
         }
     }
@@ -62,7 +63,7 @@ export class ErgogenProvider implements CustomTextEditorProvider {
         const ergogenConfigurationJson = document.getText();
 
         webviewPanel.webview.postMessage({
-            type: 'ergogen-editor-update',
+            type: Events.editorUpdate,
             json: ergogenConfigurationJson
         });
     }
@@ -118,26 +119,40 @@ export class ErgogenProvider implements CustomTextEditorProvider {
         const openInErgogenEditorCommand = commands.registerCommand(
             Commands.openInErgogenEditor,
             () => {
-                const editor = window.activeTextEditor;
+                this.reopenWithEditor(ViewTypes.ergogenEditor);
 
-                commands.executeCommand(Commands.workbenchCloseActiveEditor)
-                    .then(_ =>
-                        commands.executeCommand(
-                            Commands.vscodeOpenWith,
-                            editor?.document?.uri,
-                            ViewTypes.ergogenEditor));
+                // const editor = window.activeTextEditor;
+
+                // commands.executeCommand(Commands.workbenchCloseActiveEditor)
+                //     .then(_ =>
+                //         commands.executeCommand(
+                //             Commands.vscodeOpenWith,
+                //             editor?.document?.uri,
+                //             ViewTypes.ergogenEditor));
             });
 
         const openInTextEditorCommand = commands.registerCommand(
             Commands.openInTextEditor,
             () => {
-                const editor = window.activeTextEditor;
+                this.reopenWithEditor(ViewTypes.jsonWithCommentsEditor);
 
-                commands.executeCommand(Commands.workbenchReopenTextEditor, editor?.document?.uri);
+                // const editor = window.activeTextEditor;
+                // commands.executeCommand(Commands.workbenchReopenTextEditor, editor?.document?.uri);
             });
 
         context.subscriptions.push(openInErgogenEditorCommand);
         context.subscriptions.push(openInTextEditorCommand);
+    }
+
+    private static reopenWithEditor(viewType: string): void {
+        const editor = window.activeTextEditor;
+
+        commands.executeCommand(Commands.workbenchCloseActiveEditor)
+            .then(_ =>
+                commands.executeCommand(
+                    Commands.vscodeOpenWith,
+                    editor?.document?.uri,
+                    viewType));
     }
 }
 

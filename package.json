@@ -31,8 +31,8 @@
                     ".ergogen"
                 ],
                 "icon": {
-                    "dark": "src/assets/icons/ergogen.svg",
-                    "light": "src/assets/icons/ergogen.svg"
+                    "dark": "src/assets/icons/dark/ergogen.svg",
+                    "light": "src/assets/icons/light/ergogen.svg"
                 }
             }
         ],
