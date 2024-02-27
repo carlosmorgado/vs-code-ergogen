@@ -3,11 +3,13 @@ import { ViewTypes } from "../constants/view.types";
 import { getNonce } from "../utils/getNonce";
 import { Commands } from "../constants/comands";
 import { Events } from "../constants/events";
+import { ErgogenConfigurationService } from "../services/ergogenConfigurationService";
 
 // Based on https://github.com/timheuer/resx-editor/tree/main
 
 export class ErgogenProvider implements CustomTextEditorProvider {
     private static readonly viewType = ViewTypes.ergogenEditor;
+    private documentUri: Uri | undefined;
 
     constructor(private readonly context: ExtensionContext) { }
 
@@ -24,6 +26,7 @@ export class ErgogenProvider implements CustomTextEditorProvider {
         webviewPanel: WebviewPanel,
         token: CancellationToken
     ): void | Thenable<void> {
+        this.documentUri = document.uri;
         this.configureWebviewPanel(document, webviewPanel);
         this.updateWebview(document, webviewPanel);
     }
@@ -120,24 +123,12 @@ export class ErgogenProvider implements CustomTextEditorProvider {
             Commands.openInErgogenEditor,
             () => {
                 this.reopenWithEditor(ViewTypes.ergogenEditor);
-
-                // const editor = window.activeTextEditor;
-
-                // commands.executeCommand(Commands.workbenchCloseActiveEditor)
-                //     .then(_ =>
-                //         commands.executeCommand(
-                //             Commands.vscodeOpenWith,
-                //             editor?.document?.uri,
-                //             ViewTypes.ergogenEditor));
             });
 
         const openInTextEditorCommand = commands.registerCommand(
             Commands.openInTextEditor,
             () => {
                 this.reopenWithEditor(ViewTypes.jsonWithCommentsEditor);
-
-                // const editor = window.activeTextEditor;
-                // commands.executeCommand(Commands.workbenchReopenTextEditor, editor?.document?.uri);
             });
 
         context.subscriptions.push(openInErgogenEditorCommand);
@@ -145,14 +136,13 @@ export class ErgogenProvider implements CustomTextEditorProvider {
     }
 
     private static reopenWithEditor(viewType: string): void {
-        const editor = window.activeTextEditor;
-
         commands.executeCommand(Commands.workbenchCloseActiveEditor)
             .then(_ =>
-                commands.executeCommand(
-                    Commands.vscodeOpenWith,
-                    editor?.document?.uri,
-                    viewType));
+                ErgogenConfigurationService
+                    .getOrCreateConfigurationFileUriAsync()
+                    .then((fileUri: Uri) => {
+                        commands.executeCommand(Commands.vscodeOpenWith, fileUri, viewType);
+                    }));
     }
 }
 

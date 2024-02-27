@@ -34,6 +34,12 @@
                     "dark": "src/assets/icons/dark/ergogen.svg",
                     "light": "src/assets/icons/light/ergogen.svg"
                 }
+            },
+            {
+                "id": "jsonc",
+                "extensions": [
+                    ".ergogen"
+                ]
             }
         ],
         "viewsContainers": {

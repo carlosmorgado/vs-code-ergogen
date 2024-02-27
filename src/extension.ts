@@ -4,6 +4,7 @@ import { Commands } from './constants/comands';
 import { ViewTypes } from './constants/view.types';
 import { join } from 'path';
 import { writeFileSync } from 'fs';
+import { ErgogenConfigurationService } from './services/ergogenConfigurationService';
 
 export function activate(context: ExtensionContext) {
     // Test Sidebar
@@ -20,29 +21,10 @@ export function activate(context: ExtensionContext) {
     const configureErgogenProject = commands.registerCommand(
         Commands.configureErgogenProject,
         () => {
-            workspace
-                .findFiles('**/*.ergogen', '**/node_modules/**', 1)
-                .then(files => {
-                    if (files.length > 0) {
-                        const filePath = files[0].fsPath;
-                        const fileUri = Uri.file(filePath);
-
-                        commands.executeCommand(Commands.vscodeOpenWith,fileUri, ViewTypes.ergogenEditor);
-
-                        return;
-                    }
-                    const workspaceFolder = workspace.workspaceFolders?.[0];
-                    if (!workspaceFolder) {
-                        window.showErrorMessage('No workspace folder found');
-                        return;
-                    }
-
-                    const filePath = join(workspaceFolder.uri.fsPath, `${workspaceFolder.name}.ergogen`);
-                    writeFileSync(filePath, '');
-
-                    const uri = Uri.file(filePath);
-
-                    commands.executeCommand(Commands.vscodeOpenWith, uri, ViewTypes.ergogenEditor);
+            ErgogenConfigurationService
+                .getOrCreateConfigurationFileUriAsync()
+                .then((fileUri: Uri) => {
+                    commands.executeCommand(Commands.vscodeOpenWith, fileUri, ViewTypes.ergogenEditor);
                 });
         });
 
