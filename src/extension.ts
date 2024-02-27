@@ -1,10 +1,11 @@
-import { ExtensionContext, window, commands, workspace, Uri } from 'vscode';
+import { ExtensionContext, window, commands, workspace, Uri, FileSystemWatcher } from 'vscode';
 import { ErgogenProvider } from './editors/ergogen.provider';
 import { Commands } from './constants/comands';
 import { ViewTypes } from './constants/view.types';
 import { join } from 'path';
 import { writeFileSync } from 'fs';
-import { ErgogenConfigurationService } from './services/ergogenConfigurationService';
+import { ErgogenConfigurationManager } from './services/ergogenConfigurationManager';
+import { ErgogenConfiguration } from './models/ergogenConfiguration';
 
 export function activate(context: ExtensionContext) {
     // Test Sidebar
@@ -21,7 +22,7 @@ export function activate(context: ExtensionContext) {
     const configureErgogenProject = commands.registerCommand(
         Commands.configureErgogenProject,
         () => {
-            ErgogenConfigurationService
+            ErgogenConfigurationManager
                 .getOrCreateConfigurationFileUriAsync()
                 .then((fileUri: Uri) => {
                     commands.executeCommand(Commands.vscodeOpenWith, fileUri, ViewTypes.ergogenEditor);
@@ -31,6 +32,14 @@ export function activate(context: ExtensionContext) {
     context.subscriptions.push(configureErgogenProject);
 
 	context.subscriptions.push(ErgogenProvider.register(context));
+
+    let ergogenConfiguration: ErgogenConfiguration | undefined;
+
+    ErgogenConfigurationManager
+        .subscribeErgogenConfigurantionFileChangeAsync((configration: ErgogenConfiguration | undefined) => {
+            ergogenConfiguration = configration;
+        })
+        .then((fileSystemWatcher: FileSystemWatcher) => context.subscriptions.push(fileSystemWatcher));
 }
 
 export function deactivate() { }

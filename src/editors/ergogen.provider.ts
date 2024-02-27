@@ -3,7 +3,7 @@ import { ViewTypes } from "../constants/view.types";
 import { getNonce } from "../utils/getNonce";
 import { Commands } from "../constants/comands";
 import { Events } from "../constants/events";
-import { ErgogenConfigurationService } from "../services/ergogenConfigurationService";
+import { ErgogenConfigurationManager } from "../services/ergogenConfigurationManager";
 
 // Based on https://github.com/timheuer/resx-editor/tree/main
 
@@ -138,7 +138,7 @@ export class ErgogenProvider implements CustomTextEditorProvider {
     private static reopenWithEditor(viewType: string): void {
         commands.executeCommand(Commands.workbenchCloseActiveEditor)
             .then(_ =>
-                ErgogenConfigurationService
+                ErgogenConfigurationManager
                     .getOrCreateConfigurationFileUriAsync()
                     .then((fileUri: Uri) => {
                         commands.executeCommand(Commands.vscodeOpenWith, fileUri, viewType);
