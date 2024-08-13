@@ -2,10 +2,9 @@ import { ExtensionContext, window, commands, workspace, Uri, FileSystemWatcher }
 import { ErgogenProvider } from './editors/ergogen.provider';
 import { Commands } from './constants/comands';
 import { ViewTypes } from './constants/view.types';
-import { join } from 'path';
-import { writeFileSync } from 'fs';
 import { ErgogenConfigurationManager } from './services/ergogenConfigurationManager';
 import { ErgogenConfiguration } from './models/ergogenConfiguration';
+import { ErgogenConfigurationTreeDataProvider } from './providers/ergogenConfigurationTreeDataProvider';
 
 export function activate(context: ExtensionContext) {
     // Test Sidebar
@@ -34,10 +33,25 @@ export function activate(context: ExtensionContext) {
 	context.subscriptions.push(ErgogenProvider.register(context));
 
     let ergogenConfiguration: ErgogenConfiguration | undefined;
+    let configTreeDataProvider: ErgogenConfigurationTreeDataProvider | undefined;
 
     ErgogenConfigurationManager
         .subscribeErgogenConfigurantionFileChangeAsync((configration: ErgogenConfiguration | undefined) => {
+            const refreshConfigView: boolean = configration?.configurationFolder !== ergogenConfiguration?.configurationFolder;
+
             ergogenConfiguration = configration;
+
+            if (!configTreeDataProvider) {
+                configTreeDataProvider = new ErgogenConfigurationTreeDataProvider(ergogenConfiguration!.configurationFolder);
+
+                window.registerTreeDataProvider('ergogen.views.configurationFolder', configTreeDataProvider);
+            }
+            else {
+                if (refreshConfigView) {
+                    configTreeDataProvider.changeFolder(ergogenConfiguration!.configurationFolder);
+                    configTreeDataProvider.refresh();
+                }
+            }
         })
         .then((fileSystemWatcher: FileSystemWatcher) => context.subscriptions.push(fileSystemWatcher));
 }
